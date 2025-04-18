@@ -1,6 +1,0 @@
-AuthService/AuthServiceApplication.class
-AuthService/models/UsersDTO.class
-AuthService/services/UserService.class
-AuthService/controllers/AuthController.class
-AuthService/configs/RestTemplateConfig.class
-AuthService/services/AuthService.class
