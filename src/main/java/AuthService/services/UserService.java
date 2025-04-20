@@ -1,6 +1,9 @@
 package AuthService.services;
 
+import AuthService.helpers.Exception400;
 import AuthService.models.UsersDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +18,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
 public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final DiscoveryClient discoveryClient;
     private final RestTemplate restTemplate;
@@ -34,8 +39,7 @@ public class UserService {
                     .orElse(null);
 
             if (serviceInstance == null) {
-                System.err.println("UserService not found in DiscoveryClient!");
-                return null;
+                throw new Exception400("UserService not found in DiscoveryClient!");
             }
             // Getting base url of user service.
             String baseUrl = serviceInstance.getUri().toString();
@@ -52,13 +56,14 @@ public class UserService {
             if (response.getStatusCode().is2xxSuccessful()) {
                 return response.getBody();
             } else {
-                System.err.println("Error calling UserService: " + response.getStatusCode());
-                return null;
+                logger.error(
+                        "Error calling UserService, body : {}, statusCode : {}",
+                        response.getBody(), response.getStatusCode()
+                );
+                throw new Exception400("Error calling UserService!");
             }
-
         } catch (Exception e) {
-            System.err.println("Exception calling UserService: " + e.getMessage());
-            return null;
+            throw new Exception400("Exception calling UserService: " + e.getMessage());
         }
     }
 }

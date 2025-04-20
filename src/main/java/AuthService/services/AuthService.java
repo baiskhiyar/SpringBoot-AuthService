@@ -1,11 +1,14 @@
 package AuthService.services;
 
+import AuthService.helpers.Exception400;
 import AuthService.models.UsersDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -20,6 +23,8 @@ import javax.crypto.SecretKey;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Value("${jwt.expiration}")
     private long jwtExpirationMs;
@@ -39,14 +44,18 @@ public class AuthService {
     }
 
     public ResponseEntity<?> authenticateUser(String username, String password) throws Exception {
-        UsersDTO userDetails = userService.getUserDetails(username, password);
-        if (userDetails == null) {
-            throw new Exception("Invalid credentials!");
+        try {
+            UsersDTO userDetails = userService.getUserDetails(username, password);
+            if (userDetails == null) {
+                throw new Exception400("Invalid credentials!");
+            }
+            String jwtToken = generateJwtToken(userDetails);
+            Map<String, String> response = new HashMap<>();
+            response.put("token", jwtToken);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new Exception400(e.getMessage());
         }
-        String jwtToken = generateJwtToken(userDetails);
-        Map<String, String> response = new HashMap<>();
-        response.put("token", jwtToken);
-        return ResponseEntity.ok(response);
     }
 
     public String generateJwtToken(UsersDTO user) {

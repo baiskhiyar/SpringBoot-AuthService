@@ -50,7 +50,6 @@ public class AuthController {
                 return new ResponseEntity<>("Token Invalid!", HttpStatus.UNAUTHORIZED);
             }
         } catch (Exception e){
-            System.err.println(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
